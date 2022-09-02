@@ -1,1 +1,1 @@
-### https://timbad1.github.io/testApi/test/dist/test
+### https://timbad1.github.io/testApi/test/test.html
