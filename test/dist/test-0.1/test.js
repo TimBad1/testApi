@@ -5,7 +5,10 @@
 
 	let {items} = await response.json();
 	
-	console.log(items)
+	const onPage = 20; // элементов на странице
+	let page = 1;
+	let pages = Math.ceil(items.length / onPage);
+	
 	// function createTable() {
 	// 	const table = document.createElement('table');
 	// 	table.classList.add('table', 'table-bordered');
@@ -50,7 +53,6 @@
 	}
 
 	function createItem(data) {
-		// console.log(data)
 		const item = {
 			number: data.vri_id, 									// 1
 			si_name: data.si_name, 								// 2
@@ -83,10 +85,88 @@
 		return body;
 	}
 
-	let app = document.querySelector('#app-table');
-	app.classList.add('table', 'table-bordered', 'container');
-	app.append(createHeaderTable());
-	let main = createMainTable(items);
-	app.append(main);
+	// функция создания одной кнопки
+  function createButton(title, id, isDisabled = false) {
+    const BUTTON = document.createElement('button');
+    BUTTON.classList.add('btn', 'btn-outline-primary');
+    BUTTON.setAttribute('id', id)
+    BUTTON.setAttribute('role', 'button');
+    BUTTON.textContent = title;
 
+    if(isDisabled) {
+      BUTTON.classList.add('disabled');
+    }
+
+    return BUTTON;
+  }
+
+  // функция создания группы кнопок
+  function createButtonGroup(page, pages) {
+    const BUTTON_GROUP = document.createElement('div');
+    BUTTON_GROUP.classList.add('btn-group', 'd-block', 'text-center');
+    BUTTON_GROUP.setAttribute('role', 'group');
+    BUTTON_GROUP.setAttribute('aria-label', 'Кнопки переключения страниц');
+
+    let arrButtons = [];
+
+    // first button
+    page === 1
+      ? arrButtons.push(createButton('В начало', '1', true))
+      : arrButtons.push(createButton('В начало', '1'));
+
+    // before button
+    if(page > 2) {
+      arrButtons.push(createButton('...', page - 2));
+    }
+
+    // prev button
+    if(page >= 2) {
+      arrButtons.push(createButton(page - 1, page - 1));
+    }
+
+    // page button
+    arrButtons.push(createButton(page, page, true));
+
+    // next button
+    if(page <= pages - 1) {
+      arrButtons.push(createButton(page + 1, page + 1));
+    }
+
+    // after button
+    if(page < pages - 1) {
+      arrButtons.push(createButton('...', page + 2));
+    }
+
+    // last button
+    page === pages
+      ? arrButtons.push(createButton('В конец', pages, true))
+      : arrButtons.push(createButton('В конец', pages));
+
+    arrButtons.forEach(el => BUTTON_GROUP.append(el))
+    return BUTTON_GROUP;
+  }
+
+	const app = document.querySelector('#app-table');
+	const table = document.createElement('table');
+	table.classList.add('table', 'table-bordered', 'container');
+	app.append(table);
+	table.append(createHeaderTable());
+	let main = createMainTable(items.slice((page * onPage - onPage), (page * onPage - 1)));
+	table.append(main);
+
+	let BUTTON_GROUP = createButtonGroup(page, pages);
+
+	app.append(BUTTON_GROUP);
+	
+	buttonsPages = document.querySelectorAll('button.btn-outline-primary')
+	
+	buttonsPages.forEach(button => {
+		button.addEventListener('click', () => {
+			page = button.id;
+			main.textContent = '';
+			main = (createMainTable(items.slice((page * onPage - onPage), (page * onPage - 1))));
+			table.append(main);
+
+		})
+	})
 })()
