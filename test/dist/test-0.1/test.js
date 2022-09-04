@@ -5,21 +5,10 @@
 
 	let {items} = await response.json();
 	
-	const onPage = 20; // элементов на странице
+	const onPage = 100; // элементов на странице
 	let page = 1;
 	let pages = Math.ceil(items.length / onPage);
 	
-	// function createTable() {
-	// 	const table = document.createElement('table');
-	// 	table.classList.add('table', 'table-bordered');
-
-	// 	let headerTable = createHeaderTable();
-  //   let mainTable = createMainTable();
-
-	// 	table.append(headerTable, mainTable);
-  //   return table;
-	// }
-
 	function createHeaderTable() {
 
 		const  headItems = [
@@ -54,15 +43,15 @@
 
 	function createItem(data) {
 		const item = {
-			number: data.vri_id, 									// 1
-			si_name: data.si_name, 								// 2
-			si_designation: data.si_designation, 	// 3
-			vri_id: data.certnotice,							// 4
-			certnotice: data.year,								// 5
-			sign: data.sign,											// 6
-			vritype_id: data.vritype_id,					// 7
-			date: data.verification_at,						// 8
-			applicability: data.applicability,		// 9
+			number: data.vri_id, 										// 1
+			si_name: data.si_name, 									// 2
+			si_designation: data.si_designation, 		// 3
+			vri_id: data.certnotice,								// 4
+			certnotice: data.year,									// 5
+			sign: data.sign,												// 6
+			vritype_id: data.vritype_id,						// 7
+			date: data.verification_at,							// 8
+			applicability: data.applicability,			// 9
 		}
 
 		const row = document.createElement('tr');
@@ -109,39 +98,10 @@
 
     let arrButtons = [];
 
-    // first button
-    page === 1
-      ? arrButtons.push(createButton('В начало', '1', true))
-      : arrButtons.push(createButton('В начало', '1'));
-
-    // before button
-    if(page > 2) {
-      arrButtons.push(createButton('...', page - 2));
-    }
-
-    // prev button
-    if(page >= 2) {
-      arrButtons.push(createButton(page - 1, page - 1));
-    }
-
-    // page button
-    arrButtons.push(createButton(page, page, true));
-
-    // next button
-    if(page <= pages - 1) {
-      arrButtons.push(createButton(page + 1, page + 1));
-    }
-
-    // after button
-    if(page < pages - 1) {
-      arrButtons.push(createButton('...', page + 2));
-    }
-
-    // last button
-    page === pages
-      ? arrButtons.push(createButton('В конец', pages, true))
-      : arrButtons.push(createButton('В конец', pages));
-
+		arrButtons.push(createButton('Назад', page - 1))
+		arrButtons.push(createButton('Вперёд', page + 1))
+				
+		arrButtons[0].setAttribute('disabled', '')
     arrButtons.forEach(el => BUTTON_GROUP.append(el))
     return BUTTON_GROUP;
   }
@@ -151,7 +111,7 @@
 	table.classList.add('table', 'table-bordered', 'container');
 	app.append(table);
 	table.append(createHeaderTable());
-	let main = createMainTable(items.slice((page * onPage - onPage), (page * onPage - 1)));
+	let main = createMainTable(items.slice((page * onPage - onPage), (page * onPage)));
 	table.append(main);
 
 	let BUTTON_GROUP = createButtonGroup(page, pages);
@@ -164,9 +124,21 @@
 		button.addEventListener('click', () => {
 			page = button.id;
 			main.textContent = '';
-			main = (createMainTable(items.slice((page * onPage - onPage), (page * onPage - 1))));
-			table.append(main);
+			main = (createMainTable(items.slice((page * onPage - onPage), (page * onPage))));
 
+			table.append(main);
+			buttonsPages[0].id = parseInt(page) - 1;
+			buttonsPages[1].id = parseInt(page) + 1;
+
+			buttonsPages.forEach(button => {
+				if(button.id < 1 || button.id > pages) {
+					button.setAttribute('disabled', '');
+				} else {
+					button.removeAttribute('disabled');
+				}
+			})
 		})
 	})
+
+
 })()
