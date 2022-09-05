@@ -332,43 +332,9 @@
 		work = divisionArray( filterItems
 														.sort((a,b) => (a[sortId] < b[sortId]) ? -1: 1), onPage);
 
-					// if(sortId === 'name') {
-					// 	if(a['lastName'].toLowerCase() === b['lastName'].toLowerCase()) {
-					// 		if(a['firstName'].toLowerCase() === b['firstName'].toLowerCase()) {
-					// 			return a['middleName'].toLowerCase() < b['middleName'].toLowerCase() ? -1: 1;
-					// 		} else {
-					// 			return a['firstName'].toLowerCase() < b['firstName'].toLowerCase() ? -1: 1;
-					// 		}
-					// 	} else {
-					// 		return a['lastName'].toLowerCase() < b['lastName'].toLowerCase() ? -1: 1;
-					// 	}
-					// }
-
-					// return (a[sortId] < b[sortId]) ? -1: 1;1
-				
-
 		createMainTable(work[page])
 		console.log(buttonsPages[0].id, page, buttonsPages[1].id, 'pages', pages);
 	}
-
-	// const FILTER_ELEMENTS = [
-	// 	{
-	// 		id: 'vri_id',
-	// 		name: '№ в госреестре',
-	// 	},
-	// 	{
-	// 		id: 'si_name',
-	// 		name: 'Наименование СИ',
-	// 	},
-	// 	{
-	// 		id: 'sign',
-	// 		name: 'Шифр',
-	// 	},
-	// 	{
-	// 		id: 'verification_at',
-	// 		name: 'Дата поверки',
-	// 	},
-	// ];
 
 	let filterInput = app.querySelectorAll('#filter-form input');
 	
