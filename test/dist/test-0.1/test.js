@@ -91,15 +91,42 @@
 
 	function createTableHead() {
 		const  headItems = [
-			'№ в госреестре', 
-			'Наименование СИ', 
-			'Обозначение типа СИ', 
-			'Заводской №', 
-			'Год вып.', 
-			'Шифр', 
-			'Тип поверки', 
-			'Дата поверки', 
-			'Пригодность',
+			{
+				name: '№ в госреестре',
+				id: 'vri_id',
+			},
+			{
+        id: 'si_name',
+        name: 'Наименование СИ',
+      },
+			{
+        id: 'si_designation',
+        name: 'Обозначение типа СИ', 
+      },
+			{
+        id: 'certnotice',
+        name: 'Заводской №', 
+      },
+			{
+        id: 'year: item.year',
+        name: 'Год вып.', 
+      },
+			{
+        id: 'sign',
+        name: 'Шифр', 
+      },
+			{
+        id: 'vritype_id',
+        name: 'Тип поверки', 
+      },
+			{
+        id: 'verification_at',
+        name: 'Дата поверки',
+      },
+			{
+        id: 'applicability',
+        name: 'Пригодность',
+      },
 		]
 
 		let head = document.createElement('thead');
@@ -111,7 +138,8 @@
 
       let title = document.createElement('h3');
       title.classList.add('h5');
-      title.textContent = item;
+      title.textContent = item.name;
+			title.setAttribute('data-sort', item.id);
 			heading.append(title);
 			row.append(heading);
 		})
@@ -176,7 +204,7 @@
     return BUTTON_GROUP;
   }
 
-		let copyItems = items.map(item => item = {
+	let copyItems = items.map(item => item = {
 		vri_id: String(item.vri_id), 						// 1
 		si_name: item.si_name, 									// 2
 		si_designation: item.si_designation, 		// 3
@@ -188,9 +216,10 @@
 		applicability: item.applicability,			// 9
 	})
 
-	const onPage = 20; // элементов на странице
+	const onPage = 50; // элементов на странице
 	let page = 0;
 	let pages = Math.ceil(copyItems.length / onPage);
+	let filterItems = copyItems;
 
 	function divisionArray(arr, onPage) {
 		const newArr = []
@@ -201,10 +230,12 @@
 			}
 			newArr[newArr.length - 1].push(arr[i])
 		}
-		// console.log(newArr)
+		pages = newArr.length;
+
 		return newArr;
 	}
 
+	// создание тела таблицы
 	function createMainTable(data) {
 		tBody.textContent = '';
 		if(data) {
@@ -216,13 +247,57 @@
 		
 		return;
 	}
-	
-	let work = divisionArray(copyItems, onPage);
+
+	//фильтрация таблицы
+	function filterlist(e) {
+    let filterInput = app.querySelectorAll('#filter-form input');
+    let filterer = {};
+    filterInput.forEach(el => {
+      filterer[el.dataset.filter] = el.value;
+			
+    })
+
+    filterItems = copyItems
+      .filter(item => {
+				
+       	return item.vri_id.includes(filterer.vri_id)
+								&& item.si_name.toLowerCase().includes(filterer.si_name.toLowerCase())
+								&& item.certnotice.toLowerCase().includes(filterer.certnotice.toLowerCase())
+								&& item.sign.toLowerCase().includes(filterer.sign.toLowerCase());
+    	});
+				
+		work = divisionArray(filterItems, onPage)
+
+		pages = Math.floor(work.length);
+		if (page >= pages) {
+			page = pages - 1;
+			if (page < 0) {
+				page = 0
+			}
+			buttonsPages[0].id = parseInt(page) - 1;
+			buttonsPages[1].id = parseInt(page) + 1;
+		}
+
+		buttonsPages.forEach(button => {
+			console.log(buttonsPages[0].id, page, buttonsPages[1].id, 'pages', pages);
+
+			if(button.id < 0 || button.id >= pages) {
+
+				button.setAttribute('disabled', '');
+			} else {
+				button.removeAttribute('disabled');
+			}
+		})
+		createMainTable(work[page])
+		return;
+	}
+
+	let work = divisionArray(filterItems, onPage); // подготовка массива к первому постраничному отображению
 
 	const app = document.querySelector('#app-table');
 	const menuFilter = createAccordionMenu();
 	const table = createTable();
-	const buttonsPagination = createButtonGroup(1)
+	const buttonsPagination = createButtonGroup(page)
 
 	app.append(menuFilter, table, buttonsPagination);
 
@@ -237,12 +312,11 @@
 			page = button.id;
 			createMainTable(work[page])
 
-			console.log(page)
 			buttonsPages[0].id = parseInt(page) - 1;
 			buttonsPages[1].id = parseInt(page) + 1;
 
 			buttonsPages.forEach(button => {
-				if(button.id < 1 || button.id > pages - 1) {
+				if(button.id < 0 || button.id > pages - 1) {
 					button.setAttribute('disabled', '');
 				} else {
 					button.removeAttribute('disabled');
@@ -250,50 +324,68 @@
 			})
 		})
 	})
-	
-	function filterlist(e) {
-    let filterInput = app.querySelectorAll('#filter-form input');
-    let filterer = {};
-    filterInput.forEach(el => {
-      filterer[el.dataset.filter] = el.value;
-			
-    })
 
-    let filterItems = copyItems
-      .filter(item => {
-				// console.log(filterer.vri_id, item.vri_id);
-       	return item.vri_id.includes(filterer.vri_id)
-              && item.si_name.toLowerCase().includes(filterer.si_name.toLowerCase())
-							&& item.certnotice.toLowerCase().includes(filterer.certnotice.toLowerCase())
-							&& item.sign.toLowerCase().includes(filterer.sign.toLowerCase());
-    });
-		console.log(filterItems);
-		work = divisionArray(filterItems, onPage)
-		if (page >= work.length - 1) {
-			page = work.length - 1;
-		}
-		console.log(page);
-		pages = Math.ceil(work.length);
-		console.log(pages);
-		buttonsPages.forEach(button => {
-			if(button.id < 1 || button.id > pages) {
-				button.setAttribute('disabled', '');
-			} else {
-				button.removeAttribute('disabled');
-			}
-		})
-    createMainTable(work[page])
-		return;
-  }
+	// сортировка таблицы
+	function sortList(e) {
+		let sortId = e.target.dataset.sort;
+
+		work = divisionArray( filterItems
+														.sort((a,b) => (a[sortId] < b[sortId]) ? -1: 1), onPage);
+
+					// if(sortId === 'name') {
+					// 	if(a['lastName'].toLowerCase() === b['lastName'].toLowerCase()) {
+					// 		if(a['firstName'].toLowerCase() === b['firstName'].toLowerCase()) {
+					// 			return a['middleName'].toLowerCase() < b['middleName'].toLowerCase() ? -1: 1;
+					// 		} else {
+					// 			return a['firstName'].toLowerCase() < b['firstName'].toLowerCase() ? -1: 1;
+					// 		}
+					// 	} else {
+					// 		return a['lastName'].toLowerCase() < b['lastName'].toLowerCase() ? -1: 1;
+					// 	}
+					// }
+
+					// return (a[sortId] < b[sortId]) ? -1: 1;1
+				
+
+		createMainTable(work[page])
+		console.log(buttonsPages[0].id, page, buttonsPages[1].id, 'pages', pages);
+	}
+
+	// const FILTER_ELEMENTS = [
+	// 	{
+	// 		id: 'vri_id',
+	// 		name: '№ в госреестре',
+	// 	},
+	// 	{
+	// 		id: 'si_name',
+	// 		name: 'Наименование СИ',
+	// 	},
+	// 	{
+	// 		id: 'sign',
+	// 		name: 'Шифр',
+	// 	},
+	// 	{
+	// 		id: 'verification_at',
+	// 		name: 'Дата поверки',
+	// 	},
+	// ];
 
 	let filterInput = app.querySelectorAll('#filter-form input');
 	
-    filterInput.forEach(input => {
-			let flashTimer;
-			input.addEventListener('input', () => {
-				clearTimeout(flashTimer);
-				flashTimer = setTimeout(filterlist, 300)
-			})
-    })
+	filterInput.forEach(input => {
+		let flashTimer;
+		input.addEventListener('input', () => {
+			clearTimeout(flashTimer);
+			flashTimer = setTimeout(filterlist, 300)
+		})
+	})
+
+	let buttonsSort = app.querySelectorAll('th');
+	buttonsSort.forEach(button => {
+		button.addEventListener('click', sortList);
+	});
 
 })()
+
+
+
